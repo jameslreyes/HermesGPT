@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # Set environment variables and API keys
 openai.api_key = Config.OPENAI_API_KEY
 set_api_key(Config.ELEVEN_API_KEY)
+TELEGRAM_BOT_TOKEN = Config.TELEGRAM_BOT_TOKEN
 
 
 # Fetch the list of voices
@@ -326,7 +327,7 @@ def main() -> None:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    application = Application.builder().token("6165971104:AAEhdBKyyT-gfoOuSQussuDhHobUbQq0K5o").build()
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Declare filters
     private_filter = PrivateFilter()

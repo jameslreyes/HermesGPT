@@ -8,6 +8,7 @@ load_dotenv()
 
 class Config:
     # Set environment variables and API keys
+    TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
     ELEVEN_API_KEY = os.environ["ELEVEN_API_KEY"]
     BING_API_KEY = os.environ["BING_API_KEY"]
