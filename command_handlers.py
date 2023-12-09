@@ -142,7 +142,7 @@ async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await send_chat_action_async(update, 'typing')
         await asyncio.sleep(0.5)
         await update.message.reply_text("Conversation history cleared.")
-        print("ChatGPT: Conversation history cleared.")
+        print("HermesGPT: Conversation history cleared.")
     except Exception as e:
         print(f"Error occurred while clearing conversation history: {str(e)}")
         await update.message.reply_text("An error occurred while clearing conversation history. Please try again later.")

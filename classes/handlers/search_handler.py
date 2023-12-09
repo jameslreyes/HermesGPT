@@ -139,7 +139,7 @@ class SearchHandler():
 
                 # Pass the combined content and prompt to ChatGPT and generate a response
                 chat_gpt = ChatGPT()
-                chat_gpt_response = await chat_gpt.get_chat_gpt_response(gpt_prompt + "\n\n" + combined_content, user_id, context, model="gpt-3.5-turbo-16k")
+                chat_gpt_response = await chat_gpt.get_chat_gpt_response(gpt_prompt + "\n\n" + combined_content, user_id, context)
 
                 formatted_response = chat_gpt_response["choices"][0]["message"]["content"]
                 print(f"\n\nResponse: {formatted_response}")
