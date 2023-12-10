@@ -1,17 +1,14 @@
 import json
-import time
 import pytz
 import logging
 import asyncio
 import datetime
 import requests
-from io import BytesIO
 import openai
-from langdetect import detect
 from deepgram import Deepgram
 from elevenlabs import set_api_key
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 from command_handlers import start, help_command, clear_command, speak_command, voices_command, select_voice_command, stable_command, unstable_command, image_command, search_command, passcode_command, summarize_command, feedback_command, button
 from scripts.helper_functions import send_chat_action_async, PrivateFilter, GroupFilter, SlashSpaceFilter
 from classes.handlers.voice_handler import VoiceHandler

@@ -1,7 +1,6 @@
 import os
 import openai
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from langdetect import detect
 
 class ChatGPT:
     def __init__(self):
