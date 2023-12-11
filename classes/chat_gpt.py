@@ -1,11 +1,10 @@
 import os
 import openai
-from transformers import AutoTokenizer, AutoModelForCausalLM
+# from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class ChatGPT:
     def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("NousResearch/Nous-Hermes-13b")
-        self.model = AutoModelForCausalLM.from_pretrained("NousResearch/Nous-Hermes-13b")
+        pass
     
     async def get_chat_gpt_response(self, user_input, user_id, context):
         if 'messages' not in context.user_data:

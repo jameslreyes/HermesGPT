@@ -5,6 +5,7 @@ import asyncio
 import datetime
 import requests
 import openai
+from gpt4all import GPT4All
 from deepgram import Deepgram
 from elevenlabs import set_api_key
 from telegram import Update
@@ -33,6 +34,8 @@ TELEGRAM_BOT_TOKEN = Config.TELEGRAM_BOT_TOKEN
 response = requests.get("https://api.elevenlabs.io/v1/voices", headers={"xi-api-key": Config.ELEVEN_API_KEY})
 voice_data = response.json()
 
+# Initialize GPT4All with a specific model
+model = GPT4All("nous-hermes-llama2-13b.Q4_0.gguf")
 
 # Initialize Deepgram client on startup
 deepgram = Deepgram(Config.DEEPGRAM_API_KEY)
@@ -101,102 +104,21 @@ async def chat_gpt_direct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     while retry_count <= max_retries:
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4-1106-preview",
-                messages=conversation_history,
-                temperature=0.5,
-                max_tokens=4096,
-                top_p=1,
-                function_call="auto",
-                functions=[
-                    {
-                        "name": "get_current_weather",
-                        "description": "Get the current weather for a given location",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "location": {
-                                    "type": "string",
-                                    "description": "The city and state, e.g. San Francisco, CA"
-                                }
-                            },
-                            "required": ["location"]
-                        }
-                    }
-                ]
-            )
-            break
-        except openai.error.OpenAIError as e:
-            if ("overloaded with other requests" in str(e) and retry_count < max_retries):
-                retry_count += 1
-                # Wait for a short period before retrying
-                time.sleep(2 ** retry_count)  # Exponential backoff
-            else:
-                # If retry limit reached or other error occurred, send an error message to user
-                await send_chat_action_async(update, 'typing')
-                await asyncio.sleep(0.5)
-                await update.message.reply_text("I'm sorry, there was an issue with my response. Please try again later. You can also try clearing the conversation history by typing /clear and then try again.")
-                return
+            # Use GPT4All to generate the response
+            with model.chat_session():
+                gpt4all_response = model.generate(user_input, max_tokens=1024)  # Adjust max_tokens as needed
         except KeyError as e:
             print("There was an error accessing a dictionary key: ", e)
             await update.message.reply_text("There was an issue with the bot's internal data. Please try again later.")
         except Exception as e:
-            print("An unexpected error occurred: ", e)
-            await update.message.reply_text("An unexpected error occurred. Please try again later.")
-
-    if not response:
-        # If the response is still empty after retrying, send an error message to the user
-        await send_chat_action_async(update, 'typing')
-        await asyncio.sleep(0.5)
-        await update.message.reply_text(
-            "I'm sorry, there was an issue with my response. Please try again later. You can also try clearing the conversation history by typing /clear and then try again."
-        )
-        return
-
-    # Generate the response and edit the "Thinking..." message with the response text
-    chat_gpt_response = response.choices[0].message.content.strip()
-
-    # Check if GPT chose to call a function
-    function_call = response.choices[0].message.get("function_call")
-
-    if function_call and function_call.get('name') == "get_current_weather":
-
-        # Extract out its arguments which should be in JSON format
-        arguments_json_string = function_call.get('arguments')
-
-        # Convert JSON string into Python dictionary
-        arguments_dict = json.loads(arguments_json_string)
-
-        # Call your actual get_current_weather function with these arguments and get back real-time weather data
-        weather_info_dict = WeatherHandler.get_current_weather(arguments_dict.get('location'))
-
-        # Send another Chat completion API call with GPT's response and weather data as new message
-        new_conversation_history = conversation_history + [
-            {"role": "assistant", "content": chat_gpt_response},
-            {"role": "function", "name": "get_current_weather", "content": json.dumps(weather_info_dict)},
-        ]
-
-        second_response = openai.ChatCompletion.create(
-            model="gpt-4-1106-preview",
-            messages=new_conversation_history,
-            temperature=0.5,
-            max_tokens=4096,
-            top_p=1,
-        )
-
-        chat_gpt_response_2nd_time = second_response.choices[0].message.content.strip()
-
-        try:
-            # Try to edit the "Thinking..." message
-            await send_chat_action_async(update, 'typing')
-            await asyncio.sleep(1)
-            await context.bot.edit_message_text(chat_id=update.effective_chat.id, 
-                                                message_id=thinking_message_id, 
-                                                text=chat_gpt_response_2nd_time)
-            print("Successfully edited message.")
-        except Exception as e:
             # If an exception occurs, print it to the console
-            print(f"Failed to edit message: {e}")
+            print(f"An error occurred while calling GPT-4-All: {e}")
+            retry_count += 1
+            # If retry limit reached or other error occurred, send an error message to user
+            await send_chat_action_async(update, 'typing')
+            await asyncio.sleep(0.5)
+            await update.message.reply_text("I'm sorry, there was an issue with my response. Please try again later. You can also try clearing the conversation history by typing /clear and then try again.")
+            return
 
     if voice_handler.modes.get(user_id, "stable") == "unstable":
         chat_gpt_response = await ChatHandler.unstable_text_transform(chat_gpt_response)
@@ -207,11 +129,10 @@ async def chat_gpt_direct(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await asyncio.sleep(1)
         await context.bot.edit_message_text(chat_id=update.effective_chat.id, 
                                             message_id=thinking_message_id, 
-                                            text=chat_gpt_response)
-        print("Successfully edited message.")
+                                            text=gpt4all_response)
+        print("Successfully edited message with GPT4All response.")
     except Exception as e:
-        # If an exception occurs, print it to the console
-        print(f"Failed to edit message: {e}")
+        print(f"Failed to edit message with GPT4All response: {e}")
 
     print(f"ChatGPT: {chat_gpt_response}")
 
