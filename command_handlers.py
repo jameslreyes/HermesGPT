@@ -57,7 +57,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await help_command(update, context)
         await send_chat_action_async(update, 'typing')
         await asyncio.sleep(1)
-        await update.message.reply_text("Disclaimer: This bot is not affiliated with OpenAI or Telegram.")
+        await update.message.reply_text("Disclaimer: This bot is not affiliated with Telegram.")
     except Exception as e:
         print(f"An error occurred in the start function: {e}")
         # Handle the exception here or log it for further investigation
@@ -75,7 +75,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         print(f"{user_name} (ID: {user_id}): /help")
 
         help_text_private = (
-            "Hi\\! I am ChatGPT, your personal assistant\\. Here are a couple of ways to interact with me:\n\n"
+            "Hi\\! I am HermesGPT, your personal assistant\\. Here are a couple of ways to interact with me:\n\n"
             "Just send a message to start a conversation with me\\.\n\n"
             "*Voice Settings*\n"
             "/voices \\- Shows a list of available voices\n"
@@ -93,7 +93,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         )
         
         help_text_group = (
-            "Hi\\! I'm ChatGPT, your personal assistant\\. Here are a couple of ways to interact with me:\n\n"
+            "Hi\\! I'm HermesGPT, your personal assistant\\. Here are a couple of ways to interact with me:\n\n"
             "/ \\- Start a message with '/' to talk to me\n\n"
             "*Voice Settings*\n"
             "/voices \\- Shows a list of available voices\n"
@@ -129,7 +129,7 @@ async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user_id = update.effective_user.id
 
     if user_id not in Config.AUTHORIZED_USER_IDS:
-        await update.message.reply_text("You do not have permission to use this bot. If you have a passcode, simply type /passcode followed by your code.")
+        await update.message.reply_text("You do not have permission to use this bot. If you have a passcode, simply type /passcode followed by your code, like so: /passcode 1234.")
         return
 
     print(f"{user_name} (ID: {user_id}): /clear")
